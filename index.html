@@ -169,7 +169,7 @@
   .badge-claude{ background:#00395D; color:#fff; }
   .badge-chatgpt{ background:#5AC5CC; color:#00395D; }
   .badge-either{ background:var(--grey-bg); color:var(--dark-blue); border:1.5px solid var(--grey-line); }
-  .badge-stop{ background:#00395D; color:#fff; }
+  .badge-stop{ background:red; color:#fff; }
 
   .result-why{
     font-size:14.5px;
@@ -254,9 +254,9 @@
     <div class="meta">
       <span>Last reviewed: July 2026</span>
       <span>Owner: Caitlin, Digital Systems &amp; Optimisation</span>
-      <a href="mailto:cwells@masterplumbers.org.nz?subject=AI%20tool%20picker%20-%20feedback">Suggest a change</a>
+      <a href="mailto:caitlin@masterplumbers.org.nz?subject=AI%20tool%20picker%20-%20feedback">Suggest a change</a>
     </div>
-    Internal guide · not a substitute for the AI use policy · when in doubt, ask before pasting member or apprentice data into any tool
+    Internal guide · not a substitute for the <a href="https://masterplumbers.sharepoint.com/:b:/s/POC/IQAE7cyRmXkeRbdg6FfppZxUARXL28WrFXiygMNCXOpq1lg?e=zuFH8e">AI use policy</a> · when in doubt, ask before pasting member or apprentice data into any tool
   </footer>
 
 </div>
@@ -269,7 +269,7 @@ const questions = {
   gate: {
     step: 1,
     label: "Step 1 of 3",
-    text: "Does this task involve apprentice, member, or staff's personal data, or invlove uploading records containing:<ul><li>records</li><li>health info</li><li>disciplinary matters</li><li>financial/account details</li></ul>",
+    text: "Does this task involve apprentice, member, or staff personal data — records, health info, disciplinary matters, or financial/account details?",
     options: [
       { label: "Yes", sub: "It includes or references identifiable people's personal information", next: "stop" },
       { label: "No", sub: "General work, no personal/sensitive data involved", next: "category" }
@@ -280,12 +280,13 @@ const questions = {
     label: "Step 2 of 3",
     text: "What kind of task is this?",
     options: [
-      { label: "Creating formal or official documents", sub: "SLT papers, board reports, PGDB correspondence, official member comms", next: "result_claude_formal" },
-      { label: "Communications for apprentices, hosts, or members", sub: "Routine emails, event invites, newsletters", next: "result_either_routine" },
+      { label: "Writing external or formal comms", sub: "SLT papers, board reports, PGDB correspondence, official member comms", next: "result_claude_formal" },
+      { label: "Everyday member/apprentice comms", sub: "Routine emails, event invites, newsletters", next: "result_either_routine" },
       { label: "Data, systems or technical work", sub: "iMIS queries, Power Automate, analysis, reporting", next: "category_technical" },
-      { label: "Marketing or creative content", sub: "Social posts, campaign copy, magazine content, images", next: "result_chatgpt_creative" },
+      { label: "Marketing or creative content", sub: "Social posts, campaign copy, magazine content", next: "result_either_creative" },
       { label: "Brainstorming or early ideas", sub: "Workshop design, event ideas, first-draft thinking", next: "result_chatgpt_brainstorm" },
-      { label: "HR-adjacent writing", sub: "Position descriptions, review language, policy drafting", next: "result_claude_hr" }
+      { label: "HR-adjacent writing", sub: "Position descriptions, review language, policy drafting", next: "result_claude_hr" },
+      { label: "Creating posters or images", sub: "Any visual/poster content for MP or ML", next: "result_stop_posters" }
     ]
   },
   category_technical: {
@@ -306,7 +307,8 @@ const results = {
     why: "Neither tool should be used with identifiable personal data unless it's been cleared through our data handling process. This applies regardless of which AI tool you're using.",
     notes: [
       { warn:true, text:"Before proceeding: remove or redact names and identifying details if possible, and check with your manager or the digital systems team about whether this task is appropriate for AI assistance at all." },
-      { warn:false, text:"If the data can be fully anonymised (no names, no way to re-identify someone), it may be fine to proceed once redacted — but confirm this first rather than assuming." }
+      { warn:false, text:"If the data can be fully anonymised (no names, no way to re-identify someone), it may be fine to proceed once redacted — but confirm this first rather than assuming." },
+      { warn:true, text:"Refer to our AI use policy for more information. <a href=\"https://masterplumbers.sharepoint.com/:b:/s/POC/IQAE7cyRmXkeRbdg6FfppZxUARXL28WrFXiygMNCXOpq1lg?e=zuFH8e\" target=\"_blank\">AI use policy</a>" }
     ]
   },
   result_claude_formal: {
@@ -319,9 +321,11 @@ const results = {
   },
   result_either_routine: {
     badgeClass: "badge-either",
-    badge: "Either ChatGPT or Claude is fine",
+    badge: "Either ChatGPT or Claude works",
     why: "For routine, low-stakes comms, use whichever tool you already have open.",
-    notes: []
+    notes: [
+      { warn:false, text:"If it's going to an external audience, check it against the brand guidelines and tone of voice, or loop in the marcomms team." }
+    ]
   },
   result_claude_technical: {
     badgeClass: "badge-claude",
@@ -335,11 +339,13 @@ const results = {
     why: "Ester and our other Custom GPT tools are already built on OpenAI's platform with OAuth-based integrations. Stay in that ecosystem — switching platforms isn't worth rebuilding the plumbing.",
     notes: []
   },
-  result_chatgpt_creative: {
-    badgeClass: "badge-chatgpt",
-    badge: "Use ChatGPT",
-    why: "ChatGPT tends to be stronger for <strong>fast, varied creative output</strong> and has built-in image generation, which suits marketing and campaign work well.",
-    notes: []
+  result_either_creative: {
+    badgeClass: "badge-either",
+    badge: "Either ChatGPT or Claude works",
+    why: "Both tools are comparable for text-only creative copy like social posts, campaign lines, and magazine content. Use whichever's already open, or whichever you have more workflow familiarity with.",
+    notes: [
+      { warn:false, text:"Check against the brand guidelines and tone of voice, or loop in the marcomms team, before anything goes to an external audience." }
+    ]
   },
   result_chatgpt_brainstorm: {
     badgeClass: "badge-chatgpt",
@@ -354,7 +360,17 @@ const results = {
     badge: "Use Claude",
     why: "HR-adjacent writing benefits from a more conservative default tone and a lower risk of overconfident or invented claims — important where the wording has real consequences for someone's role.",
     notes: [
-      { warn:true, text:"Any HR-related content should still be reviewed by a person before use, regardless of which tool drafted it." }
+      { warn:true, text:"Any HR-related content should still be reviewed by a person before use, regardless of which tool drafted it." },
+      { warn:false, text:"If it's external-facing, check it against the brand guidelines and tone of voice, or loop in the marcomms team." }
+    ]
+  },
+  result_stop_posters: {
+    badgeClass: "badge-stop",
+    badge: "Stop — check first",
+    why: "AI tools aren't the right starting point for posters or images.",
+    notes: [
+      { warn:true, text:"All posters or images used by MP or ML need to be cleared by someone on the marketing and comms team before distribution to an external audience." },
+      { warn:false, text:"Presentations should extend our brands look and feel to maintain a consistent, professional standard across all member, host and business partner communications." }
     ]
   }
 };
