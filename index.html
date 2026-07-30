@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Which AI tool should I use? | Master Plumbers</title>
+<style>
+  :root{
+    --dark-blue:#00395D;
+    --aqua:#5AC5CC;
+    --black:#000000;
+    --white:#FFFFFF;
+    --grey-bg:#F4F7F8;
+    --grey-line:#D7E1E4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', 'Inter', Arial, sans-serif;
+    background:var(--grey-bg);
+    color:var(--black);
+    display:flex;
+    justify-content:center;
+    padding:32px 16px;
+    min-height:100vh;
+  }
+  .app{
+    width:100%;
+    max-width:640px;
+  }
+  header.top{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:22px;
+  }
+  .mark{
+    width:44px;height:44px;border-radius:10px;
+    background:var(--dark-blue);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .mark svg{width:24px;height:24px;}
+  header.top h1{
+    font-size:17px;
+    letter-spacing:0.2px;
+    margin:0;
+    color:var(--dark-blue);
+    font-weight:700;
+  }
+  header.top p{
+    margin:2px 0 0;
+    font-size:12.5px;
+    color:#4d6673;
+  }
+
+  /* pipeline progress */
+  .pipeline{
+    display:flex;
+    align-items:center;
+    margin:0 0 28px;
+    padding:0 4px;
+  }
+  .pipeline .seg{
+    flex:1;
+    height:4px;
+    background:var(--grey-line);
+    position:relative;
+  }
+  .pipeline .seg.done{ background:var(--aqua); }
+  .pipeline .joint{
+    width:14px;height:14px;border-radius:50%;
+    background:var(--grey-line);
+    border:2px solid var(--white);
+    box-shadow:0 0 0 2px var(--grey-line);
+    flex-shrink:0;
+    transition:background .25s ease, box-shadow .25s ease;
+  }
+  .pipeline .joint.done{
+    background:var(--aqua);
+    box-shadow:0 0 0 2px var(--aqua);
+  }
+  .pipeline .joint.current{
+    background:var(--dark-blue);
+    box-shadow:0 0 0 2px var(--dark-blue);
+  }
+
+  .card{
+    background:var(--white);
+    border-radius:14px;
+    padding:30px 28px 28px;
+    box-shadow:0 1px 3px rgba(0,57,93,0.08), 0 8px 24px rgba(0,57,93,0.06);
+    min-height:300px;
+    display:flex;
+    flex-direction:column;
+  }
+  .step-label{
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    color:var(--aqua);
+    font-weight:700;
+    margin-bottom:10px;
+  }
+  .question{
+    font-size:21px;
+    line-height:1.35;
+    color:var(--dark-blue);
+    font-weight:700;
+    margin:0 0 22px;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .opt{
+    text-align:left;
+    border:1.5px solid var(--grey-line);
+    background:var(--white);
+    border-radius:10px;
+    padding:14px 16px;
+    font-size:15px;
+    color:var(--black);
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, transform .1s ease;
+    font-family:inherit;
+  }
+  .opt:hover{
+    border-color:var(--aqua);
+    background:#F2FBFC;
+  }
+  .opt:active{ transform:scale(0.99); }
+  .opt .sub{
+    display:block;
+    font-size:12.5px;
+    color:#5a7480;
+    margin-top:3px;
+    font-weight:400;
+  }
+
+  .back-row{
+    margin-top:auto;
+    padding-top:18px;
+  }
+  .back-btn{
+    background:none;
+    border:none;
+    color:#5a7480;
+    font-size:13px;
+    cursor:pointer;
+    padding:6px 0;
+    font-family:inherit;
+  }
+  .back-btn:hover{ color:var(--dark-blue); text-decoration:underline; }
+
+  /* result screen */
+  .result-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:9px 16px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:15px;
+    margin-bottom:16px;
+    width:fit-content;
+  }
+  .badge-claude{ background:#00395D; color:#fff; }
+  .badge-chatgpt{ background:#5AC5CC; color:#00395D; }
+  .badge-either{ background:var(--grey-bg); color:var(--dark-blue); border:1.5px solid var(--grey-line); }
+  .badge-stop{ background:#00395D; color:#fff; }
+
+  .result-why{
+    font-size:14.5px;
+    line-height:1.6;
+    color:#26424f;
+    margin:0 0 16px;
+  }
+  .result-why strong{ color:var(--dark-blue); }
+
+  .note-box{
+    background:var(--grey-bg);
+    border-left:3px solid var(--aqua);
+    padding:12px 14px;
+    border-radius:6px;
+    font-size:13px;
+    line-height:1.55;
+    color:#26424f;
+    margin-bottom:10px;
+  }
+  .note-box.warn{
+    border-left-color:var(--dark-blue);
+  }
+
+  .restart-btn{
+    margin-top:16px;
+    align-self:flex-start;
+    background:var(--dark-blue);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:11px 20px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .restart-btn:hover{ background:#00293f; }
+
+  footer.foot{
+    text-align:center;
+    font-size:11.5px;
+    color:#7891a0;
+    margin-top:18px;
+    line-height:1.7;
+  }
+  footer.foot .meta{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:4px;
+  }
+  footer.foot a{
+    color:#3d7a86;
+    text-decoration:none;
+  }
+  footer.foot a:hover{ text-decoration:underline; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 14h4v6H4z" stroke="#5AC5CC" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M8 17h5a3 3 0 0 0 3-3v-2" stroke="#5AC5CC" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="18" cy="7" r="3.2" stroke="#5AC5CC" stroke-width="1.8"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Which AI tool should I use?</h1>
+      <p>A quick guide for Master Plumbers &amp; Masterlink staff</p>
+    </div>
+  </header>
+
+  <div class="pipeline" id="pipeline"></div>
+
+  <div class="card" id="card"></div>
+
+  <footer class="foot">
+    <div class="meta">
+      <span>Last reviewed: July 2026</span>
+      <span>Owner: Caitlin, Digital Systems &amp; Optimisation</span>
+      <a href="mailto:cwells@masterplumbers.org.nz?subject=AI%20tool%20picker%20-%20feedback">Suggest a change</a>
+    </div>
+    Internal guide · not a substitute for the AI use policy · when in doubt, ask before pasting member or apprentice data into any tool
+  </footer>
+
+</div>
+
+<script>
+const TOTAL_STEPS = 3;
+let history = []; // stack of {stepIndex, answerKey}
+
+const questions = {
+  gate: {
+    step: 1,
+    label: "Step 1 of 3",
+    text: "Does this task involve apprentice, member, or staff personal data — records, health info, disciplinary matters, or financial/account details?",
+    options: [
+      { label: "Yes", sub: "It includes or references identifiable people's personal information", next: "stop" },
+      { label: "No", sub: "General work, no personal/sensitive data involved", next: "category" }
+    ]
+  },
+  category: {
+    step: 2,
+    label: "Step 2 of 3",
+    text: "What kind of task is this?",
+    options: [
+      { label: "Writing external or formal comms", sub: "SLT papers, board reports, PGDB correspondence, official member comms", next: "result_claude_formal" },
+      { label: "Everyday member/apprentice comms", sub: "Routine emails, event invites, newsletters", next: "result_either_routine" },
+      { label: "Data, systems or technical work", sub: "iMIS queries, Power Automate, analysis, reporting", next: "category_technical" },
+      { label: "Marketing or creative content", sub: "Social posts, campaign copy, magazine content, images", next: "result_chatgpt_creative" },
+      { label: "Brainstorming or early ideas", sub: "Workshop design, event ideas, first-draft thinking", next: "result_chatgpt_brainstorm" },
+      { label: "HR-adjacent writing", sub: "Position descriptions, review language, policy drafting", next: "result_claude_hr" }
+    ]
+  },
+  category_technical: {
+    step: 3,
+    label: "Step 3 of 3",
+    text: "Is this using one of our existing custom AI tools (like Ester), or general technical/data work?",
+    options: [
+      { label: "It's Ester or another Custom GPT tool", sub: "Already built on OpenAI's platform", next: "result_chatgpt_ester" },
+      { label: "General technical or data work", sub: "iMIS, Power Automate, spreadsheets, analysis, code", next: "result_claude_technical" }
+    ]
+  }
+};
+
+const results = {
+  stop: {
+    badgeClass: "badge-stop",
+    badge: "Stop — check first",
+    why: "Neither tool should be used with identifiable personal data unless it's been cleared through our data handling process. This applies regardless of which AI tool you're using.",
+    notes: [
+      { warn:true, text:"Before proceeding: remove or redact names and identifying details if possible, and check with your manager or the digital systems team about whether this task is appropriate for AI assistance at all." },
+      { warn:false, text:"If the data can be fully anonymised (no names, no way to re-identify someone), it may be fine to proceed once redacted — but confirm this first rather than assuming." }
+    ]
+  },
+  result_claude_formal: {
+    badgeClass: "badge-claude",
+    badge: "Use Claude",
+    why: "<strong>Formal, external-facing writing</strong> benefits from Claude's more careful, precise tone and its tendency to stick closely to the brief rather than embellishing or inventing detail.",
+    notes: [
+      { warn:false, text:"Reminder: nothing external-facing goes out without a human review pass, regardless of which tool drafted it." }
+    ]
+  },
+  result_either_routine: {
+    badgeClass: "badge-either",
+    badge: "Either tool works",
+    why: "For routine, low-stakes comms, use whichever tool you already have open. This isn't worth the decision overhead.",
+    notes: []
+  },
+  result_claude_technical: {
+    badgeClass: "badge-claude",
+    badge: "Use Claude",
+    why: "<strong>Technical and data work</strong> — iMIS queries, Power Automate logic, spreadsheet analysis, code — tends to go more smoothly with Claude, particularly for longer or multi-step reasoning.",
+    notes: []
+  },
+  result_chatgpt_ester: {
+    badgeClass: "badge-chatgpt",
+    badge: "Use ChatGPT",
+    why: "Ester and our other Custom GPT tools are already built on OpenAI's platform with OAuth-based integrations. Stay in that ecosystem — switching platforms isn't worth rebuilding the plumbing.",
+    notes: []
+  },
+  result_chatgpt_creative: {
+    badgeClass: "badge-chatgpt",
+    badge: "Use ChatGPT",
+    why: "ChatGPT tends to be stronger for <strong>fast, varied creative output</strong> and has built-in image generation, which suits marketing and campaign work well.",
+    notes: []
+  },
+  result_chatgpt_brainstorm: {
+    badgeClass: "badge-chatgpt",
+    badge: "Use ChatGPT",
+    why: "For <strong>early-stage brainstorming</strong>, breadth of ideas matters more than precision at this point — ChatGPT is well suited to generating a wide spread of options quickly.",
+    notes: [
+      { warn:false, text:"Once you've narrowed down to a direction worth writing up properly, consider switching to Claude for the polished version." }
+    ]
+  },
+  result_claude_hr: {
+    badgeClass: "badge-claude",
+    badge: "Use Claude",
+    why: "HR-adjacent writing benefits from a more conservative default tone and a lower risk of overconfident or invented claims — important where the wording has real consequences for someone's role.",
+    notes: [
+      { warn:true, text:"Any HR-related content should still be reviewed by a person before use, regardless of which tool drafted it." }
+    ]
+  }
+};
+
+function render(nodeKey){
+  const q = questions[nodeKey];
+  const card = document.getElementById('card');
+
+  if(q){
+    renderPipeline(q.step);
+    let html = `<div class="step-label">${q.label}</div>`;
+    html += `<div class="question">${q.text}</div>`;
+    html += `<div class="options">`;
+    q.options.forEach((opt, i) => {
+      html += `<button class="opt" data-node="${nodeKey}" data-idx="${i}">
+        ${opt.label}${opt.sub ? `<span class="sub">${opt.sub}</span>` : ""}
+      </button>`;
+    });
+    html += `</div>`;
+    if(history.length > 0){
+      html += `<div class="back-row"><button class="back-btn" id="backBtn">← Back</button></div>`;
+    }
+    card.innerHTML = html;
+
+    card.querySelectorAll('.opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const node = btn.getAttribute('data-node');
+        const idx = parseInt(btn.getAttribute('data-idx'));
+        history.push(node);
+        const next = questions[node].options[idx].next;
+        render(next);
+      });
+    });
+    const backBtn = document.getElementById('backBtn');
+    if(backBtn){
+      backBtn.addEventListener('click', () => {
+        const prev = history.pop();
+        render(prev);
+      });
+    }
+  } else {
+    renderResult(nodeKey);
+  }
+}
+
+function renderResult(key){
+  renderPipeline(TOTAL_STEPS + 1);
+  const r = results[key];
+  let html = `<div class="result-badge ${r.badgeClass}">${r.badge}</div>`;
+  html += `<p class="result-why">${r.why}</p>`;
+  r.notes.forEach(n => {
+    html += `<div class="note-box ${n.warn ? 'warn' : ''}">${n.text}</div>`;
+  });
+  html += `<button class="restart-btn" id="restartBtn">Start over</button>`;
+  document.getElementById('card').innerHTML = html;
+  document.getElementById('restartBtn').addEventListener('click', () => {
+    history = [];
+    render('gate');
+  });
+}
+
+function renderPipeline(currentStep){
+  const pipeline = document.getElementById('pipeline');
+  let html = '';
+  for(let i = 1; i <= TOTAL_STEPS; i++){
+    const jointDone = i < currentStep;
+    const jointCurrent = i === currentStep;
+    html += `<div class="joint ${jointDone ? 'done' : ''} ${jointCurrent ? 'current' : ''}"></div>`;
+    if(i < TOTAL_STEPS){
+      html += `<div class="seg ${i < currentStep ? 'done' : ''}"></div>`;
+    }
+  }
+  pipeline.innerHTML = html;
+}
+
+render('gate');
+</script>
+</body>
+</html>
