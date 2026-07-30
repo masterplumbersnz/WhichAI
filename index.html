@@ -269,7 +269,7 @@ const questions = {
   gate: {
     step: 1,
     label: "Step 1 of 3",
-    text: "Does this task involve apprentice, member, or staff personal data — records, health info, disciplinary matters, or financial/account details?",
+    text: "Does this task involve apprentice, member, or staff's personal data, or invlove uploading records containing:<ul><li>records</li><li>health info</li><li>disciplinary matters</li><li>financial/account details</li></ul>",
     options: [
       { label: "Yes", sub: "It includes or references identifiable people's personal information", next: "stop" },
       { label: "No", sub: "General work, no personal/sensitive data involved", next: "category" }
@@ -280,10 +280,10 @@ const questions = {
     label: "Step 2 of 3",
     text: "What kind of task is this?",
     options: [
-      { label: "Writing external or formal comms", sub: "SLT papers, board reports, PGDB correspondence, official member comms", next: "result_claude_formal" },
-      { label: "Everyday member/apprentice comms", sub: "Routine emails, event invites, newsletters", next: "result_either_routine" },
+      { label: "Creating formal or official documents", sub: "SLT papers, board reports, PGDB correspondence, official member comms", next: "result_claude_formal" },
+      { label: "Communications for apprentices, hosts, or members", sub: "Routine emails, event invites, newsletters", next: "result_either_routine" },
       { label: "Data, systems or technical work", sub: "iMIS queries, Power Automate, analysis, reporting", next: "category_technical" },
-      { label: "Marketing or creative content", sub: "Social posts, campaign copy, magazine content", next: "result_either_creative" },
+      { label: "Marketing or creative content", sub: "Social posts, campaign copy, magazine content, images", next: "result_chatgpt_creative" },
       { label: "Brainstorming or early ideas", sub: "Workshop design, event ideas, first-draft thinking", next: "result_chatgpt_brainstorm" },
       { label: "HR-adjacent writing", sub: "Position descriptions, review language, policy drafting", next: "result_claude_hr" }
     ]
@@ -319,8 +319,8 @@ const results = {
   },
   result_either_routine: {
     badgeClass: "badge-either",
-    badge: "Either tool works",
-    why: "For routine, low-stakes comms, use whichever tool you already have open. This isn't worth the decision overhead.",
+    badge: "Either ChatGPT or Claude is fine",
+    why: "For routine, low-stakes comms, use whichever tool you already have open.",
     notes: []
   },
   result_claude_technical: {
@@ -335,10 +335,10 @@ const results = {
     why: "Ester and our other Custom GPT tools are already built on OpenAI's platform with OAuth-based integrations. Stay in that ecosystem — switching platforms isn't worth rebuilding the plumbing.",
     notes: []
   },
-  result_either_creative: {
-    badgeClass: "badge-either",
-    badge: "Either tool works",
-    why: "Both tools are comparable for text-only creative copy like social posts, campaign lines, and magazine content. Use whichever's already open, or whichever your team has more workflow familiarity with.",
+  result_chatgpt_creative: {
+    badgeClass: "badge-chatgpt",
+    badge: "Use ChatGPT",
+    why: "ChatGPT tends to be stronger for <strong>fast, varied creative output</strong> and has built-in image generation, which suits marketing and campaign work well.",
     notes: []
   },
   result_chatgpt_brainstorm: {
